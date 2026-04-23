@@ -244,6 +244,16 @@ function deleteSshHost(alias: string): boolean {
   return true
 }
 
+function redactIPs(text: string): string {
+  return text.replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, "***.***.***.***")
+}
+
+function getDisplayDescription(host: SelectOption, showIPs: boolean): string {
+  if (!host.description) return ""
+  if (showIPs) return host.description
+  return redactIPs(host.description)
+}
+
 const outputFile = process.env.SSHZ_OUTPUT || path.join(os.tmpdir(), `sshz-${process.pid}.out`)
 
 type FocusField = "alias" | "hostname" | "user" | "options" | "port" | "identityFile"
@@ -259,6 +269,7 @@ const App = () => {
   const [statusMessage, setStatusMessage] = createSignal("")
   const [showDeleteConfirm, setShowDeleteConfirm] = createSignal(false)
   const [hostToDelete, setHostToDelete] = createSignal<SelectOption | null>(null)
+  const [showIPs, setShowIPs] = createSignal(false)
 
   const [alias, setAlias] = createSignal("")
   const [hostname, setHostname] = createSignal("")
@@ -493,6 +504,11 @@ const App = () => {
         setSelectedIndex(0)
         return
       }
+      if (key.name === "s" && key.ctrl && !key.meta && !key.shift) {
+        key.stopPropagation()
+        setShowIPs((prev) => !prev)
+        return
+      }
       return
     }
 
@@ -589,7 +605,7 @@ const App = () => {
                   />
                   <box flexGrow={1} />
                   <text
-                    content={host.description || ""}
+                    content={getDisplayDescription(host, showIPs())}
                     textColor={isSelected ? COLORS.selectedText : COLORS.accessory}
                   />
                 </box>
@@ -624,6 +640,7 @@ const App = () => {
           <text content="[^d] delete" textColor={COLORS.accessory} />
           <text content="[^q] quit" textColor={COLORS.accessory} />
           <text content="[↵] connect" textColor={COLORS.accessory} />
+          <text content={showIPs() ? "[^s] hide ips" : "[^s] show ips"} textColor={COLORS.accessory} />
           <Show when={searchQuery().length > 1}>
             <text content="[esc] clear" textColor={COLORS.accessory} />
           </Show>
