@@ -106,6 +106,103 @@ function appendSshHost(alias: string, hostname: string, user: string, port?: str
   }
 }
 
+function getHostDetails(alias: string): { alias: string; hostname: string; user: string; port: string; identityFile: string } | null {
+  const configPath = path.join(os.homedir(), ".ssh", "config")
+  if (!fs.existsSync(configPath)) return null
+
+  const content = fs.readFileSync(configPath, "utf-8")
+  const lines = content.split("\n")
+
+  let inBlock = false
+  let hostname = ""
+  let user = ""
+  let port = ""
+  let identityFile = ""
+
+  for (const rawLine of lines) {
+    const lineWithoutComment = rawLine.split("#")[0].trim()
+    if (!lineWithoutComment) continue
+
+    const hostMatch = lineWithoutComment.match(/^Host\s+(.+)$/i)
+    if (hostMatch) {
+      if (inBlock) break
+      const aliases = hostMatch[1].trim().split(/\s+/)
+      if (aliases.includes(alias)) {
+        inBlock = true
+      }
+      continue
+    }
+
+    if (inBlock) {
+      const kvMatch = lineWithoutComment.match(/^(\w+)\s+(.+)$/)
+      if (kvMatch) {
+        const key = kvMatch[1].toLowerCase()
+        const val = kvMatch[2].trim()
+        if (key === "hostname") hostname = val
+        if (key === "user") user = val
+        if (key === "port") port = val
+        if (key === "identityfile") identityFile = val
+      }
+    }
+  }
+
+  if (!inBlock) return null
+  return { alias, hostname, user, port, identityFile }
+}
+
+function updateSshHost(oldAlias: string, alias: string, hostname: string, user: string, port?: string, identityFile?: string): boolean {
+  const configPath = path.join(os.homedir(), ".ssh", "config")
+  if (!fs.existsSync(configPath)) return false
+
+  const content = fs.readFileSync(configPath, "utf-8")
+  const lines = content.split("\n")
+
+  let inTargetBlock = false
+  let blockStart = -1
+  let blockEnd = -1
+  let found = false
+
+  for (let i = 0; i < lines.length; i++) {
+    const rawLine = lines[i]
+    const lineWithoutComment = rawLine.split("#")[0].trim()
+
+    const hostMatch = lineWithoutComment.match(/^Host\s+(.+)$/i)
+    if (hostMatch) {
+      if (inTargetBlock) {
+        blockEnd = i
+        break
+      }
+      const aliases = hostMatch[1].trim().split(/\s+/)
+      if (aliases.includes(oldAlias)) {
+        found = true
+        inTargetBlock = true
+        blockStart = i
+      }
+    }
+  }
+
+  if (!found) return false
+  if (blockEnd === -1) blockEnd = lines.length
+
+  let newBlock = `Host ${alias}\n    HostName ${hostname}\n    User ${user}`
+  if (port) newBlock += `\n    Port ${port}`
+  if (identityFile) newBlock += `\n    IdentityFile ${identityFile}`
+
+  const result = [
+    ...lines.slice(0, blockStart),
+    newBlock,
+    ...lines.slice(blockEnd),
+  ]
+
+  let output = result.join("\n")
+  while (output.endsWith("\n\n")) {
+    output = output.slice(0, -1)
+  }
+
+  fs.writeFileSync(configPath, output, { mode: 0o600 })
+  return true
+}
+
 function deleteSshHost(alias: string): boolean {
   const configPath = path.join(os.homedir(), ".ssh", "config")
   if (!fs.existsSync(configPath)) return false
@@ -169,6 +266,24 @@ const App = () => {
   const [port, setPort] = createSignal("")
   const [identityFile, setIdentityFile] = createSignal("")
 
+  const [isEditing, setIsEditing] = createSignal(false)
+  const [originalAlias, setOriginalAlias] = createSignal("")
+  const [originalHostname, setOriginalHostname] = createSignal("")
+  const [originalUser, setOriginalUser] = createSignal("")
+  const [originalPort, setOriginalPort] = createSignal("")
+  const [originalIdentityFile, setOriginalIdentityFile] = createSignal("")
+
+  const hasChanges = createMemo(() => {
+    if (!isEditing()) return true
+    return (
+      alias() !== originalAlias() ||
+      hostname() !== originalHostname() ||
+      user() !== originalUser() ||
+      port() !== originalPort() ||
+      identityFile() !== originalIdentityFile()
+    )
+  })
+
   const filteredHosts = createMemo(() => {
     const query = searchQuery().toLowerCase().trim()
     if (!query) return hosts()
@@ -215,19 +330,46 @@ const App = () => {
     setFocusedField(prev)
   }
 
-  const saveHost = () => {
-    if (!alias() || !hostname() || !user()) return
-    appendSshHost(alias(), hostname(), user(), port() || undefined, identityFile() || undefined)
-    setHosts(getSshHosts())
-    setShowModal(false)
+  const resetForm = () => {
     setAlias("")
     setHostname("")
     setUser("")
     setPort("")
     setIdentityFile("")
     setShowOptions(false)
-    setSelectedIndex(0)
-    setSearchQuery("")
+    setIsEditing(false)
+  }
+
+  const openEditModal = (host: SelectOption) => {
+    const details = getHostDetails(host.name)
+    if (!details) return
+    setOriginalAlias(details.alias)
+    setOriginalHostname(details.hostname)
+    setOriginalUser(details.user)
+    setOriginalPort(details.port)
+    setOriginalIdentityFile(details.identityFile)
+    setAlias(details.alias)
+    setHostname(details.hostname)
+    setUser(details.user)
+    setPort(details.port)
+    setIdentityFile(details.identityFile)
+    setShowOptions(!!details.port || !!details.identityFile)
+    setIsEditing(true)
+    setFocusedField("alias")
+    setShowModal(true)
+  }
+
+  const saveHost = () => {
+    if (!alias() || !hostname() || !user()) return
+    if (isEditing() && !hasChanges()) return
+    if (isEditing()) {
+      updateSshHost(originalAlias(), alias(), hostname(), user(), port() || undefined, identityFile() || undefined)
+    } else {
+      appendSshHost(alias(), hostname(), user(), port() || undefined, identityFile() || undefined)
+    }
+    setHosts(getSshHosts())
+    setShowModal(false)
+    resetForm()
   }
 
   const handleSelectHost = (host: SelectOption) => {
@@ -276,8 +418,17 @@ const App = () => {
 
     if (!showModal()) {
       if (key.name === "n" && key.ctrl && !key.meta && !key.shift) {
+        resetForm()
         setShowModal(true)
         setFocusedField("alias")
+        return
+      }
+      if (key.name === "e" && key.ctrl && !key.meta && !key.shift) {
+        key.stopPropagation()
+        const hostsList = filteredHosts()
+        if (hostsList.length > 0) {
+          openEditModal(hostsList[selectedIndex()])
+        }
         return
       }
       if (key.name === "q" && key.ctrl && !key.meta && !key.shift) {
@@ -347,6 +498,7 @@ const App = () => {
 
     if (key.name === "escape") {
       setShowModal(false)
+      resetForm()
       return
     }
 
@@ -468,6 +620,7 @@ const App = () => {
       >
         <box flexDirection="row" gap={2}>
           <text content="[^n] new host" textColor={COLORS.accessory} />
+          <text content="[^e] edit" textColor={COLORS.accessory} />
           <text content="[^d] delete" textColor={COLORS.accessory} />
           <text content="[^q] quit" textColor={COLORS.accessory} />
           <text content="[↵] connect" textColor={COLORS.accessory} />
@@ -503,112 +656,117 @@ const App = () => {
             height={showOptions() ? 20 : 14}
             border={true}
             borderColor={COLORS.border}
-            title=" New Host "
+            title={isEditing() ? " Edit Host " : " New Host "}
             titleColor={COLORS.orange}
             backgroundColor={COLORS.panelBg}
             zIndex={11}
             flexDirection="column"
             padding={{ left: 2, right: 2, top: 1, bottom: 1 }}
-            gap={1}
           >
-            <box flexDirection="row" width="100%" height={1}>
-              <text content="Alias" width={12} textColor={COLORS.accessory} />
-              <input
-                value={alias()}
-                onChange={setAlias}
-                onSubmit={() => nextField()}
-                placeholder="production"
-                width={40}
-                focused={focusedField() === "alias"}
-                backgroundColor={focusedField() === "alias" ? COLORS.inputBg : undefined}
-                textColor={COLORS.title}
-                placeholderColor={COLORS.placeholder}
-              />
-            </box>
-
-            <box flexDirection="row" width="100%" height={1}>
-              <text content="Host" width={12} textColor={COLORS.accessory} />
-              <input
-                value={hostname()}
-                onChange={setHostname}
-                onSubmit={() => nextField()}
-                placeholder="prod.example.com"
-                width={40}
-                focused={focusedField() === "hostname"}
-                backgroundColor={focusedField() === "hostname" ? COLORS.inputBg : undefined}
-                textColor={COLORS.title}
-                placeholderColor={COLORS.placeholder}
-              />
-            </box>
-
-            <box flexDirection="row" width="100%" height={1}>
-              <text content="User" width={12} textColor={COLORS.accessory} />
-              <input
-                value={user()}
-                onChange={setUser}
-                onSubmit={() => nextField()}
-                placeholder="deploy"
-                width={40}
-                focused={focusedField() === "user"}
-                backgroundColor={focusedField() === "user" ? COLORS.inputBg : undefined}
-                textColor={COLORS.title}
-                placeholderColor={COLORS.placeholder}
-              />
-            </box>
-
-            <box
-              flexDirection="row"
-              width="100%"
-              height={1}
-              focusable={true}
-              focused={focusedField() === "options"}
-              backgroundColor={focusedField() === "options" ? COLORS.inputBg : undefined}
-              onKeyDown={(key) => {
-                if (key.name === "return") {
-                  setShowOptions(!showOptions())
-                }
-              }}
-            >
-              <text
-                content={showOptions() ? "▲ Fewer options" : "▼ More options"}
-                textColor={focusedField() === "options" ? COLORS.orange : COLORS.accessory}
-              />
-            </box>
-
-            <Show when={showOptions()}>
+            <box flexDirection="column" gap={1} flexGrow={1}>
               <box flexDirection="row" width="100%" height={1}>
-                <text content="Port" width={12} textColor={COLORS.accessory} />
+                <text content="Alias" width={12} textColor={COLORS.accessory} />
                 <input
-                  value={port()}
-                  onChange={setPort}
+                  value={alias()}
+                  onChange={setAlias}
                   onSubmit={() => nextField()}
-                  placeholder="22"
+                  placeholder="production"
                   width={40}
-                  focused={focusedField() === "port"}
-                  backgroundColor={focusedField() === "port" ? COLORS.inputBg : undefined}
+                  focused={focusedField() === "alias"}
+                  backgroundColor={focusedField() === "alias" ? COLORS.inputBg : undefined}
                   textColor={COLORS.title}
                   placeholderColor={COLORS.placeholder}
                 />
               </box>
 
               <box flexDirection="row" width="100%" height={1}>
-                <text content="Key" width={12} textColor={COLORS.accessory} />
+                <text content="Host" width={12} textColor={COLORS.accessory} />
                 <input
-                  value={identityFile()}
-                  onChange={setIdentityFile}
-                  onSubmit={saveHost}
-                  placeholder="~/.ssh/id_rsa"
+                  value={hostname()}
+                  onChange={setHostname}
+                  onSubmit={() => nextField()}
+                  placeholder="prod.example.com"
                   width={40}
-                  focused={focusedField() === "identityFile"}
-                  backgroundColor={focusedField() === "identityFile" ? COLORS.inputBg : undefined}
+                  focused={focusedField() === "hostname"}
+                  backgroundColor={focusedField() === "hostname" ? COLORS.inputBg : undefined}
                   textColor={COLORS.title}
                   placeholderColor={COLORS.placeholder}
                 />
               </box>
-            </Show>
+
+              <box flexDirection="row" width="100%" height={1}>
+                <text content="User" width={12} textColor={COLORS.accessory} />
+                <input
+                  value={user()}
+                  onChange={setUser}
+                  onSubmit={() => nextField()}
+                  placeholder="deploy"
+                  width={40}
+                  focused={focusedField() === "user"}
+                  backgroundColor={focusedField() === "user" ? COLORS.inputBg : undefined}
+                  textColor={COLORS.title}
+                  placeholderColor={COLORS.placeholder}
+                />
+              </box>
+
+              <box
+                flexDirection="row"
+                width="100%"
+                height={1}
+                focusable={true}
+                focused={focusedField() === "options"}
+                backgroundColor={focusedField() === "options" ? COLORS.inputBg : undefined}
+                onKeyDown={(key) => {
+                  if (key.name === "return") {
+                    setShowOptions(!showOptions())
+                  }
+                }}
+              >
+                <text
+                  content={showOptions() ? "▲ Fewer options" : "▼ More options"}
+                  textColor={focusedField() === "options" ? COLORS.orange : COLORS.accessory}
+                />
+              </box>
+
+              <Show when={showOptions()}>
+                <box flexDirection="row" width="100%" height={1}>
+                  <text content="Port" width={12} textColor={COLORS.accessory} />
+                  <input
+                    value={port()}
+                    onChange={setPort}
+                    onSubmit={() => nextField()}
+                    placeholder="22"
+                    width={40}
+                    focused={focusedField() === "port"}
+                    backgroundColor={focusedField() === "port" ? COLORS.inputBg : undefined}
+                    textColor={COLORS.title}
+                    placeholderColor={COLORS.placeholder}
+                  />
+                </box>
+
+                <box flexDirection="row" width="100%" height={1}>
+                  <text content="Key" width={12} textColor={COLORS.accessory} />
+                  <input
+                    value={identityFile()}
+                    onChange={setIdentityFile}
+                    onSubmit={saveHost}
+                    placeholder="~/.ssh/id_rsa"
+                    width={40}
+                    focused={focusedField() === "identityFile"}
+                    backgroundColor={focusedField() === "identityFile" ? COLORS.inputBg : undefined}
+                    textColor={COLORS.title}
+                    placeholderColor={COLORS.placeholder}
+                  />
+                </box>
+              </Show>
+            </box>
 
             <box flexDirection="row" width="100%" height={1} marginTop={1} justifyContent="space-between">
-              <text content="[enter] next / save" textColor={COLORS.muted} />
+              <Show when={isEditing() && !hasChanges()} fallback={
+                <text content="[enter] next / save" textColor={COLORS.muted} />
+              }>
+                <text content="[enter] next" textColor={COLORS.muted} />
+              </Show>
               <text content="[esc] cancel" textColor={COLORS.muted} />
             </box>
           </box>
