@@ -1,0 +1,13 @@
+{
+  "name": "sshz-v0",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "start": "bun index.tsx"
+  },
+  "dependencies": {
+    "@opentui/core": "latest",
+    "@opentui/solid": "latest",
+    "solid-js": "latest"
+  }
+}
