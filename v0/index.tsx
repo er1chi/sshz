@@ -336,6 +336,12 @@ const App = () => {
         setSelectedIndex(0)
         return
       }
+      if (key.name === "escape") {
+        key.stopPropagation()
+        setSearchQuery("")
+        setSelectedIndex(0)
+        return
+      }
       return
     }
 
@@ -465,6 +471,9 @@ const App = () => {
           <text content="[^d] delete" textColor={COLORS.accessory} />
           <text content="[^q] quit" textColor={COLORS.accessory} />
           <text content="[↵] connect" textColor={COLORS.accessory} />
+          <Show when={searchQuery().length > 1}>
+            <text content="[esc] clear" textColor={COLORS.accessory} />
+          </Show>
         </box>
         <box flexGrow={1} />
         <Show when={statusMessage()}>
