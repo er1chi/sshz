@@ -160,6 +160,8 @@ const App = () => {
   const [selectedIndex, setSelectedIndex] = createSignal(0)
   const [searchQuery, setSearchQuery] = createSignal("")
   const [statusMessage, setStatusMessage] = createSignal("")
+  const [showDeleteConfirm, setShowDeleteConfirm] = createSignal(false)
+  const [hostToDelete, setHostToDelete] = createSignal<SelectOption | null>(null)
 
   const [alias, setAlias] = createSignal("")
   const [hostname, setHostname] = createSignal("")
@@ -236,6 +238,42 @@ const App = () => {
   }
 
   useKeyboard((key) => {
+    if (showDeleteConfirm()) {
+      if (key.name === "return") {
+        key.stopPropagation()
+        const host = hostToDelete()
+        if (host && deleteSshHost(host.name)) {
+          const newHosts = getSshHosts()
+          setHosts(newHosts)
+          const query = searchQuery().toLowerCase().trim()
+          const newFiltered = query
+            ? newHosts.filter(h =>
+                h.name.toLowerCase().includes(query) ||
+                (h.description && h.description.toLowerCase().includes(query))
+              )
+            : newHosts
+          setSelectedIndex(prev => Math.min(prev, Math.max(0, newFiltered.length - 1)))
+          setStatusMessage(`Deleted host '${host.name}'`)
+          setTimeout(() => setStatusMessage(""), 3000)
+        }
+        setShowDeleteConfirm(false)
+        setHostToDelete(null)
+        return
+      }
+      if (key.name === "q") {
+        key.stopPropagation()
+        setShowDeleteConfirm(false)
+        setHostToDelete(null)
+        return
+      }
+      if (key.name === "escape") {
+        setShowDeleteConfirm(false)
+        setHostToDelete(null)
+        return
+      }
+      return
+    }
+
     if (!showModal()) {
       if (key.name === "n" && key.ctrl && !key.meta && !key.shift) {
         setShowModal(true)
@@ -250,21 +288,8 @@ const App = () => {
         key.stopPropagation()
         const hostsList = filteredHosts()
         if (hostsList.length > 0) {
-          const host = hostsList[selectedIndex()]
-          if (deleteSshHost(host.name)) {
-            const newHosts = getSshHosts()
-            setHosts(newHosts)
-            const query = searchQuery().toLowerCase().trim()
-            const newFiltered = query
-              ? newHosts.filter(h =>
-                  h.name.toLowerCase().includes(query) ||
-                  (h.description && h.description.toLowerCase().includes(query))
-                )
-              : newHosts
-            setSelectedIndex(prev => Math.min(prev, Math.max(0, newFiltered.length - 1)))
-            setStatusMessage(`Deleted host '${host.name}'`)
-            setTimeout(() => setStatusMessage(""), 3000)
-          }
+          setHostToDelete(hostsList[selectedIndex()])
+          setShowDeleteConfirm(true)
         }
         return
       }
@@ -576,6 +601,44 @@ const App = () => {
             <box flexDirection="row" width="100%" height={1} marginTop={1} justifyContent="space-between">
               <text content="[enter] next / save" textColor={COLORS.muted} />
               <text content="[esc] cancel" textColor={COLORS.muted} />
+            </box>
+          </box>
+        </box>
+      </Show>
+
+      {/* Delete Confirmation Modal */}
+      <Show when={showDeleteConfirm()}>
+        <box
+          position="absolute"
+          top={0}
+          left={0}
+          width="100%"
+          height="100%"
+          backgroundColor="#000000"
+          opacity={0.85}
+          zIndex={20}
+          alignItems="center"
+          justifyContent="center"
+        >
+          <box
+            width={40}
+            height={6}
+            border={true}
+            borderColor={COLORS.border}
+            title=" Confirm Delete "
+            titleColor={COLORS.orange}
+            backgroundColor={COLORS.panelBg}
+            zIndex={21}
+            flexDirection="column"
+            padding={{ left: 2, right: 2, top: 1, bottom: 1 }}
+            gap={1}
+          >
+            <box height={1}>
+              <text content={`delete '${hostToDelete()?.name || ""}'?`} textColor={COLORS.title} />
+            </box>
+            <box flexDirection="row" width="100%" height={1} marginTop={1} justifyContent="space-between">
+              <text content="[enter] yes" textColor={COLORS.muted} />
+              <text content="[q] no" textColor={COLORS.muted} />
             </box>
           </box>
         </box>
