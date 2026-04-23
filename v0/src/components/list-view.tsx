@@ -1,23 +1,18 @@
 import { Show, createMemo } from "solid-js"
 import { COLORS } from "@/utils/colors"
-import { getDisplayDescription } from "@/utils/helpers"
-import type { SelectOption } from "@opentui/core"
-import type { Accessor } from "solid-js"
-
-interface ListViewProps {
-  hosts: Accessor<SelectOption[]>
-  filteredHosts: Accessor<SelectOption[]>
-  selectedIndex: Accessor<number>
-  searchQuery: Accessor<string>
-  showIPs: Accessor<boolean>
-}
+import { getDisplayDescription, filterHosts } from "@/utils/helpers"
+import { HostListStore } from "@/context/host-list-store"
 
 const visibleCount = 10
 
-export const ListView = (props: ListViewProps) => {
+export const ListView = () => {
+  const [state] = HostListStore.use()
+
+  const filteredHosts = createMemo(() => filterHosts(state.hosts, state.searchQuery))
+
   const scrollOffset = createMemo(() => {
-    const idx = props.selectedIndex()
-    const total = props.filteredHosts().length
+    const idx = state.selectedIndex
+    const total = filteredHosts().length
     if (total <= visibleCount) return 0
     if (idx < visibleCount - 1) return 0
     if (idx > total - visibleCount) return total - visibleCount
@@ -26,13 +21,13 @@ export const ListView = (props: ListViewProps) => {
 
   const visibleHosts = createMemo(() => {
     const offset = scrollOffset()
-    return props.filteredHosts().slice(offset, offset + visibleCount)
+    return filteredHosts().slice(offset, offset + visibleCount)
   })
 
   return (
     <box flexGrow={1} flexDirection="column" width="100%" padding={{ left: 2, right: 2, top: 1, bottom: 1 }}>
       <Show
-        when={props.hosts().length > 0}
+        when={state.hosts.length > 0}
         fallback={
           <box flexGrow={1} alignItems="center" justifyContent="center" flexDirection="column" gap={1}>
             <text content="No configured SSH hosts found" textColor={COLORS.muted} />
@@ -42,10 +37,10 @@ export const ListView = (props: ListViewProps) => {
       >
         <box flexDirection="row" height={1} marginBottom={1}>
           <text content="> " textColor={COLORS.orange} />
-          <Show when={props.searchQuery()} fallback={
+          <Show when={state.searchQuery} fallback={
             <text content="Search hosts..." textColor={COLORS.placeholder} />
           }>
-            <text content={props.searchQuery()} textColor={COLORS.title} />
+            <text content={state.searchQuery} textColor={COLORS.title} />
             <text content="_" textColor={COLORS.orange} />
           </Show>
         </box>
@@ -55,7 +50,7 @@ export const ListView = (props: ListViewProps) => {
         </box>
 
         <box flexDirection="column" width="100%" gap={0}>
-          <Show when={props.filteredHosts().length === 0}>
+          <Show when={filteredHosts().length === 0}>
             <box height={1} marginTop={1}>
               <text content="No hosts match your search" textColor={COLORS.muted} />
             </box>
@@ -63,7 +58,7 @@ export const ListView = (props: ListViewProps) => {
 
           {visibleHosts().map((host, i) => {
             const actualIndex = scrollOffset() + i
-            const isSelected = actualIndex === props.selectedIndex()
+            const isSelected = actualIndex === state.selectedIndex
             return (
               <box
                 flexDirection="row"
@@ -82,17 +77,17 @@ export const ListView = (props: ListViewProps) => {
                 />
                 <box flexGrow={1} />
                 <text
-                  content={getDisplayDescription(host, props.showIPs())}
+                  content={getDisplayDescription(host, state.showIPs)}
                   textColor={isSelected ? COLORS.selectedText : COLORS.accessory}
                 />
               </box>
             )
           })}
 
-          <Show when={props.filteredHosts().length > visibleCount}>
+          <Show when={filteredHosts().length > visibleCount}>
             <box height={1} marginTop={1} flexDirection="row">
               <text
-                content={` ${scrollOffset() + visibleHosts().length} / ${props.filteredHosts().length} `}
+                content={` ${scrollOffset() + visibleHosts().length} / ${filteredHosts().length} `}
                 textColor={COLORS.muted}
               />
             </box>
