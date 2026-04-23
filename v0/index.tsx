@@ -106,6 +106,47 @@ function appendSshHost(alias: string, hostname: string, user: string, port?: str
   }
 }
 
+function deleteSshHost(alias: string): boolean {
+  const configPath = path.join(os.homedir(), ".ssh", "config")
+  if (!fs.existsSync(configPath)) return false
+
+  const content = fs.readFileSync(configPath, "utf-8")
+  const lines = content.split("\n")
+
+  let inTargetBlock = false
+  let found = false
+  const result: string[] = []
+
+  for (let i = 0; i < lines.length; i++) {
+    const rawLine = lines[i]
+    const lineWithoutComment = rawLine.split("#")[0].trim()
+
+    const hostMatch = lineWithoutComment.match(/^Host\s+(.+)$/i)
+    if (hostMatch) {
+      const aliases = hostMatch[1].trim().split(/\s+/)
+      inTargetBlock = aliases.includes(alias)
+      if (inTargetBlock) {
+        found = true
+        continue
+      }
+    }
+
+    if (!inTargetBlock) {
+      result.push(rawLine)
+    }
+  }
+
+  if (!found) return false
+
+  let output = result.join("\n")
+  while (output.endsWith("\n\n")) {
+    output = output.slice(0, -1)
+  }
+
+  fs.writeFileSync(configPath, output, { mode: 0o600 })
+  return true
+}
+
 const outputFile = process.env.SSHZ_OUTPUT || path.join(os.tmpdir(), `sshz-${process.pid}.out`)
 
 type FocusField = "alias" | "hostname" | "user" | "options" | "port" | "identityFile"
@@ -118,6 +159,7 @@ const App = () => {
   const [focusedField, setFocusedField] = createSignal<FocusField>("alias")
   const [selectedIndex, setSelectedIndex] = createSignal(0)
   const [searchQuery, setSearchQuery] = createSignal("")
+  const [statusMessage, setStatusMessage] = createSignal("")
 
   const [alias, setAlias] = createSignal("")
   const [hostname, setHostname] = createSignal("")
@@ -203,6 +245,28 @@ const App = () => {
       if (key.name === "q" && key.ctrl && !key.meta && !key.shift) {
         renderer.destroy()
         process.exit(1)
+      }
+      if (key.name === "d" && key.ctrl && !key.meta && !key.shift) {
+        key.stopPropagation()
+        const hostsList = filteredHosts()
+        if (hostsList.length > 0) {
+          const host = hostsList[selectedIndex()]
+          if (deleteSshHost(host.name)) {
+            const newHosts = getSshHosts()
+            setHosts(newHosts)
+            const query = searchQuery().toLowerCase().trim()
+            const newFiltered = query
+              ? newHosts.filter(h =>
+                  h.name.toLowerCase().includes(query) ||
+                  (h.description && h.description.toLowerCase().includes(query))
+                )
+              : newHosts
+            setSelectedIndex(prev => Math.min(prev, Math.max(0, newFiltered.length - 1)))
+            setStatusMessage(`Deleted host '${host.name}'`)
+            setTimeout(() => setStatusMessage(""), 3000)
+          }
+        }
+        return
       }
       if (key.name === "up") {
         key.stopPropagation()
@@ -373,11 +437,15 @@ const App = () => {
       >
         <box flexDirection="row" gap={2}>
           <text content="[^n] new host" textColor={COLORS.accessory} />
+          <text content="[^d] delete" textColor={COLORS.accessory} />
           <text content="[^q] quit" textColor={COLORS.accessory} />
           <text content="[↵] connect" textColor={COLORS.accessory} />
         </box>
         <box flexGrow={1} />
-        <Show when={hosts().length > 0}>
+        <Show when={statusMessage()}>
+          <text content={statusMessage()} textColor={COLORS.orange} />
+        </Show>
+        <Show when={!statusMessage() && hosts().length > 0}>
           <text content={`${hosts().length} hosts`} textColor={COLORS.muted} />
         </Show>
       </box>
