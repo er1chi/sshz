@@ -1,0 +1,15 @@
+export const COLORS = {
+  bg: "#111111",
+  panelBg: "#1c1c1e",
+  orange: "#ff9f0a",
+  orangeDim: "#cc7f08",
+  selectedBg: "#ff9f0a",
+  selectedText: "#000000",
+  title: "#ffffff",
+  accessory: "#8e8e93",
+  muted: "#636366",
+  separator: "#2c2c2e",
+  border: "#3a3a3c",
+  inputBg: "#2c2c2e",
+  placeholder: "#48484a",
+}

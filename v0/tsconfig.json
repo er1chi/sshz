@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
     "jsx": "preserve",
-    "jsxImportSource": "@opentui/solid"
+    "jsxImportSource": "@opentui/solid",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   }
 }
