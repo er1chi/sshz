@@ -6,11 +6,11 @@ import { COLORS } from "@/utils/colors"
 import { getSshHosts, appendSshHost, getHostDetails, updateSshHost, deleteSshHost } from "@/utils/ssh"
 import { outputFile, filterHosts } from "@/utils/helpers"
 import { type FocusField } from "@/types"
-import { Header } from "@/components/Header"
-import { ListView } from "@/components/ListView"
-import { StatusBar } from "@/components/StatusBar"
-import { HostModal } from "@/components/HostModal"
-import { DeleteConfirmModal } from "@/components/DeleteConfirmModal"
+import { Header } from "@/components/header"
+import { ListView } from "@/components/list-view"
+import { StatusBar } from "@/components/status-bar"
+import { HostModal } from "@/components/host-modal"
+import { DeleteConfirmModal } from "@/components/delete-confirm-modal"
 
 export const App = () => {
   const renderer = useRenderer()
