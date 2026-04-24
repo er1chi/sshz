@@ -13,8 +13,9 @@ interface FormState {
   showOptions: boolean;
   focusedField: FocusField;
   isEditing: boolean;
+  isDirty: boolean;
+  editingAlias: string | undefined;
   host: SSH_Host;
-  original: SSH_Host;
 }
 
 export const blankHost = {
@@ -30,8 +31,9 @@ const init: FormState = {
   showOptions: false,
   focusedField: "alias",
   isEditing: false,
+  isDirty: false,
+  editingAlias: undefined,
   host: blankHost,
-  original: blankHost,
 };
 
 export const FormStore = createSimpleContext<FormState>({

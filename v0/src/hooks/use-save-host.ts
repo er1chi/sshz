@@ -8,16 +8,10 @@ export const useSaveHost = () => {
 
   return () => {
     if (!form.host.alias || !form.host.hostname || !form.host.user) return;
+    if (form.isEditing && !form.isDirty) return;
     if (form.isEditing) {
-      const unchanged =
-        form.host.alias === form.original.alias &&
-        form.host.hostname === form.original.hostname &&
-        form.host.user === form.original.user &&
-        form.host.port === form.original.port &&
-        form.host.identityFile === form.original.identityFile;
-      if (unchanged) return;
       updateSshHost(
-        form.original.alias,
+        form.editingAlias!,
         form.host.alias,
         form.host.hostname,
         form.host.user,
@@ -45,6 +39,8 @@ export const useSaveHost = () => {
       },
       showOptions: false,
       isEditing: false,
+      isDirty: false,
+      editingAlias: undefined,
     });
   };
 };

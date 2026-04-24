@@ -49,10 +49,11 @@ export const useAppKeyboard = () => {
 
   const resetForm = () => {
     setForm({
-      original: blankHost,
       host: blankHost,
       showOptions: false,
       isEditing: false,
+      isDirty: false,
+      editingAlias: undefined,
     });
   };
 
@@ -60,21 +61,11 @@ export const useAppKeyboard = () => {
     const details = getHostDetails(host.name);
     if (!details) return;
     setForm({
-      // TODO: this doesn't seem good. ai generated...
-      original: details,
       host: details,
-      // originalAlias: details.alias,
-      // originalHostname: details.hostname,
-      // originalUser: details.user,
-      // originalPort: details.port,
-      // originalIdentityFile: details.identityFile,
-      // alias: details.alias,
-      // hostname: details.hostname,
-      // user: details.user,
-      // port: details.port,
-      // identityFile: details.identityFile,
       showOptions: !!details.port || !!details.identityFile,
       isEditing: true,
+      isDirty: false,
+      editingAlias: details.alias,
       focusedField: "alias",
       showModal: true,
     });

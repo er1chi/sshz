@@ -1,4 +1,4 @@
-import { Show, createMemo } from "solid-js"
+import { Show } from "solid-js"
 import { COLORS } from "@/utils/colors"
 import { FormStore } from "@/context/form-store"
 
@@ -7,19 +7,13 @@ interface HostModalProps {
   saveHost: () => void
 }
 
+// function inputHandler() {
+ // setIsDirty()
+ // cb()
+// }
+
 export const HostModal = (props: HostModalProps) => {
   const [form, setForm] = FormStore.use()
-
-  const hasChanges = createMemo(() => {
-    if (!form.isEditing) return true
-    return (
-      form.host.alias !== form.original.alias ||
-      form.host.hostname !== form.original.hostname ||
-      form.host.user !== form.original.user ||
-      form.host.port !== form.original.port ||
-      form.host.identityFile !== form.original.identityFile
-    )
-  })
 
   return (
     <Show when={form.showModal}>
@@ -53,7 +47,10 @@ export const HostModal = (props: HostModalProps) => {
               <text content="Alias" width={12} />
               <input
                 value={form.host.alias}
-                onChange={(v: string) => setForm("host", { alias: v })}
+                onChange={(v: string) => {
+                  setForm("host", { alias: v })
+                  setForm("isDirty", true)
+                }}
                 onSubmit={() => props.nextField()}
                 placeholder="production"
                 width={40}
@@ -68,7 +65,10 @@ export const HostModal = (props: HostModalProps) => {
               <text content="Host" width={12} fg={COLORS.accessory} />
               <input
                 value={form.host.hostname}
-                onChange={(v: string) => setForm("host", { hostname: v })}
+                onChange={(v: string) => {
+                  setForm("host", { hostname: v })
+                  setForm("isDirty", true)
+                }}
                 onSubmit={() => props.nextField()}
                 placeholder="prod.example.com"
                 width={40}
@@ -83,7 +83,10 @@ export const HostModal = (props: HostModalProps) => {
               <text content="User" width={12} fg={COLORS.accessory} />
               <input
                 value={form.host.user}
-                onChange={(v: string) => setForm("host", { user: v })}
+                onChange={(v: string) => {
+                  setForm("host", { user: v })
+                  setForm("isDirty", true)
+                }}
                 onSubmit={() => props.nextField()}
                 placeholder="deploy"
                 width={40}
@@ -118,7 +121,10 @@ export const HostModal = (props: HostModalProps) => {
                 <text content="Port" width={12} fg={COLORS.accessory} />
                 <input
                   value={form.host.port}
-                  onChange={(v: string) => setForm("host", { port: v })}
+                  onChange={(v: string) => {
+                    setForm("host", { port: v })
+                    setForm("isDirty", true)
+                  }}
                   onSubmit={() => props.nextField()}
                   placeholder="22"
                   width={40}
@@ -133,7 +139,10 @@ export const HostModal = (props: HostModalProps) => {
                 <text content="Key" width={12} fg={COLORS.accessory} />
                 <input
                   value={form.host.identityFile}
-                  onChange={(v: string) => setForm("host", { identityFile: v })}
+                  onChange={(v: string) => {
+                    setForm("host", { identityFile: v })
+                    setForm("isDirty", true)
+                  }}
                   onSubmit={props.saveHost}
                   placeholder="~/.ssh/id_rsa"
                   width={40}
@@ -147,7 +156,7 @@ export const HostModal = (props: HostModalProps) => {
           </box>
 
           <box flexDirection="row" width="100%" height={1} marginTop={1} justifyContent="space-between">
-            <Show when={form.isEditing && !hasChanges()} fallback={
+            <Show when={form.isEditing && form.isDirty} fallback={
               <text content="[enter] next / save" fg={COLORS.muted} />
             }>
               <text content="[enter] next" fg={COLORS.muted} />
