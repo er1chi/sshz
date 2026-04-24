@@ -17,7 +17,7 @@ interface FormState {
   original: SSH_Host;
 }
 
-const blankHost = {
+export const blankHost = {
   alias: "",
   hostname: "",
   user: "",

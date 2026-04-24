@@ -41,18 +41,19 @@ export const HostModal = (props: HostModalProps) => {
           border={true}
           borderColor={COLORS.border}
           title={form.isEditing ? " Edit Host " : " New Host "}
-          titleColor={COLORS.orange}
+          // titleColor={COLORS.orange}
           backgroundColor={COLORS.panelBg}
           zIndex={11}
           flexDirection="column"
-          padding={{ left: 2, right: 2, top: 1, bottom: 1 }}
+          padding={1}
+          // padding={{ left: 2, right: 2, top: 1, bottom: 1 }}
         >
           <box flexDirection="column" gap={1} flexGrow={1}>
             <box flexDirection="row" width="100%" height={1}>
-              <text content="Alias" width={12} textColor={COLORS.accessory} />
+              <text content="Alias" width={12} />
               <input
                 value={form.host.alias}
-                onChange={(v: string) => setForm("host.alias", v)}
+                onChange={(v: string) => setForm("host", { alias: v })}
                 onSubmit={() => props.nextField()}
                 placeholder="production"
                 width={40}
@@ -64,10 +65,10 @@ export const HostModal = (props: HostModalProps) => {
             </box>
 
             <box flexDirection="row" width="100%" height={1}>
-              <text content="Host" width={12} textColor={COLORS.accessory} />
+              <text content="Host" width={12} fg={COLORS.accessory} />
               <input
                 value={form.host.hostname}
-                onChange={(v: string) => setForm("host.hostname", v)}
+                onChange={(v: string) => setForm("host", { hostname: v })}
                 onSubmit={() => props.nextField()}
                 placeholder="prod.example.com"
                 width={40}
@@ -79,10 +80,10 @@ export const HostModal = (props: HostModalProps) => {
             </box>
 
             <box flexDirection="row" width="100%" height={1}>
-              <text content="User" width={12} textColor={COLORS.accessory} />
+              <text content="User" width={12} fg={COLORS.accessory} />
               <input
                 value={form.host.user}
-                onChange={(v: string) => setForm("user", v)}
+                onChange={(v: string) => setForm("host", { user: v })}
                 onSubmit={() => props.nextField()}
                 placeholder="deploy"
                 width={40}
@@ -108,16 +109,16 @@ export const HostModal = (props: HostModalProps) => {
             >
               <text
                 content={form.showOptions ? "▲ Fewer options" : "▼ More options"}
-                textColor={form.focusedField === "options" ? COLORS.orange : COLORS.accessory}
+                fg={form.focusedField === "options" ? COLORS.orange : COLORS.accessory}
               />
             </box>
 
             <Show when={form.showOptions}>
               <box flexDirection="row" width="100%" height={1}>
-                <text content="Port" width={12} textColor={COLORS.accessory} />
+                <text content="Port" width={12} fg={COLORS.accessory} />
                 <input
-                  value={form.port}
-                  onChange={(v: string) => setForm("port", v)}
+                  value={form.host.port}
+                  onChange={(v: string) => setForm("host", { port: v })}
                   onSubmit={() => props.nextField()}
                   placeholder="22"
                   width={40}
@@ -129,10 +130,10 @@ export const HostModal = (props: HostModalProps) => {
               </box>
 
               <box flexDirection="row" width="100%" height={1}>
-                <text content="Key" width={12} textColor={COLORS.accessory} />
+                <text content="Key" width={12} fg={COLORS.accessory} />
                 <input
-                  value={form.identityFile}
-                  onChange={(v: string) => setForm("identityFile", v)}
+                  value={form.host.identityFile}
+                  onChange={(v: string) => setForm("host", { identityFile: v })}
                   onSubmit={props.saveHost}
                   placeholder="~/.ssh/id_rsa"
                   width={40}
@@ -147,11 +148,11 @@ export const HostModal = (props: HostModalProps) => {
 
           <box flexDirection="row" width="100%" height={1} marginTop={1} justifyContent="space-between">
             <Show when={form.isEditing && !hasChanges()} fallback={
-              <text content="[enter] next / save" textColor={COLORS.muted} />
+              <text content="[enter] next / save" fg={COLORS.muted} />
             }>
-              <text content="[enter] next" textColor={COLORS.muted} />
+              <text content="[enter] next" fg={COLORS.muted} />
             </Show>
-            <text content="[esc] cancel" textColor={COLORS.muted} />
+            <text content="[esc] cancel" fg={COLORS.muted} />
           </box>
         </box>
       </box>
