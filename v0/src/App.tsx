@@ -11,6 +11,7 @@ import { HostModal } from "@/components/host-modal"
 import { DeleteConfirmModal } from "@/components/delete-confirm-modal"
 
 const AppContent = () => {
+  // TODO: not great
   const { nextField } = useAppKeyboard()
   const saveHost = useSaveHost()
 

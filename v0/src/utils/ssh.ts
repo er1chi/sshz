@@ -150,6 +150,7 @@ export function getHostDetails(alias: string): {
   return { alias, hostname, user, port, identityFile };
 }
 
+// TODO: wtf is this
 export function updateSshHost(
   oldAlias: string,
   alias: string,

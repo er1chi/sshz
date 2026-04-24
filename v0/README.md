@@ -11,27 +11,30 @@ A minimal SSH host picker built with [OpenTUI](https://opentui.com) and Solid.js
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| `index.tsx` | OpenTUI Solid.js app with a `<select>` component |
-| `sshz` | Bash wrapper that runs the TUI and then executes `ssh` |
-| `package.json` | Bun dependencies |
-| `tsconfig.json` | TypeScript JSX config for `@opentui/solid` |
-| `bunfig.toml` | Bun preload for Solid JSX transform |
+| File            | Purpose                                                |
+| --------------- | ------------------------------------------------------ |
+| `index.tsx`     | OpenTUI Solid.js app with a `<select>` component       |
+| `sshz`          | Bash wrapper that runs the TUI and then executes `ssh` |
+| `package.json`  | Bun dependencies                                       |
+| `tsconfig.json` | TypeScript JSX config for `@opentui/solid`             |
+| `bunfig.toml`   | Bun preload for Solid JSX transform                    |
 
 ## Usage
 
 Install dependencies:
+
 ```bash
 bun install
 ```
 
 Run via the wrapper (recommended):
+
 ```bash
 ./sshz
 ```
 
 Or run the TUI directly:
+
 ```bash
 bun index.tsx
 ```
@@ -56,12 +59,12 @@ Host staging
 
 ## Key bindings
 
-| Key | Action |
-|-----|--------|
-| ↑ / k | Move up |
-| ↓ / j | Move down |
-| Enter | Select host and connect |
-| `n` | Add new host (opens modal) |
-| `Tab` / `Shift+Tab` | Cycle fields in modal |
-| `Esc` | Cancel modal |
-| Ctrl+C | Cancel and exit |
+| Key                 | Action                     |
+| ------------------- | -------------------------- |
+| ↑ / k               | Move up                    |
+| ↓ / j               | Move down                  |
+| Enter               | Select host and connect    |
+| `n`                 | Add new host (opens modal) |
+| `Tab` / `Shift+Tab` | Cycle fields in modal      |
+| `Esc`               | Cancel modal               |
+| Ctrl+C              | Cancel and exit            |
