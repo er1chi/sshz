@@ -7,6 +7,10 @@ interface HostModalProps {
   saveHost: () => void
 }
 
+// TODO: this
+// TODO: unrelated but also need to address lack of use of Portals for Modal functions
+// TODO: also unrelated but generating a project completely from scratch simply does not seem the way forward for right now
+// spend some time settings clean defaults before allowing an agent to come through and absolutely make you sad...
 // function inputHandler() {
  // setIsDirty()
  // cb()

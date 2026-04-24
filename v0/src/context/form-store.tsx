@@ -1,7 +1,7 @@
 import { createSimpleContext } from "@/utils/create-simple-context";
 import type { FocusField } from "@/types";
 
-interface SSH_Host {
+export interface SSH_Host {
   alias: string;
   hostname: string;
   user: string;
