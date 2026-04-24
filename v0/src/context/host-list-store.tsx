@@ -6,6 +6,7 @@ interface HostListState {
   hosts: SelectOption[]
   selectedIndex: number
   searchQuery: string
+  isSearching: boolean
   showIPs: boolean
   statusMessage: string
 }
@@ -14,6 +15,7 @@ const init: HostListState = {
   hosts: getSshHosts(),
   selectedIndex: 0,
   searchQuery: "",
+  isSearching: false,
   showIPs: false,
   statusMessage: "",
 }

@@ -13,11 +13,11 @@ export const HostModal = (props: HostModalProps) => {
   const hasChanges = createMemo(() => {
     if (!form.isEditing) return true
     return (
-      form.alias !== form.originalAlias ||
-      form.hostname !== form.originalHostname ||
-      form.user !== form.originalUser ||
-      form.port !== form.originalPort ||
-      form.identityFile !== form.originalIdentityFile
+      form.host.alias !== form.original.alias ||
+      form.host.hostname !== form.original.hostname ||
+      form.host.user !== form.original.user ||
+      form.host.port !== form.original.port ||
+      form.host.identityFile !== form.original.identityFile
     )
   })
 
@@ -51,8 +51,8 @@ export const HostModal = (props: HostModalProps) => {
             <box flexDirection="row" width="100%" height={1}>
               <text content="Alias" width={12} textColor={COLORS.accessory} />
               <input
-                value={form.alias}
-                onChange={(v: string) => setForm("alias", v)}
+                value={form.host.alias}
+                onChange={(v: string) => setForm("host.alias", v)}
                 onSubmit={() => props.nextField()}
                 placeholder="production"
                 width={40}
@@ -66,8 +66,8 @@ export const HostModal = (props: HostModalProps) => {
             <box flexDirection="row" width="100%" height={1}>
               <text content="Host" width={12} textColor={COLORS.accessory} />
               <input
-                value={form.hostname}
-                onChange={(v: string) => setForm("hostname", v)}
+                value={form.host.hostname}
+                onChange={(v: string) => setForm("host.hostname", v)}
                 onSubmit={() => props.nextField()}
                 placeholder="prod.example.com"
                 width={40}
@@ -81,7 +81,7 @@ export const HostModal = (props: HostModalProps) => {
             <box flexDirection="row" width="100%" height={1}>
               <text content="User" width={12} textColor={COLORS.accessory} />
               <input
-                value={form.user}
+                value={form.host.user}
                 onChange={(v: string) => setForm("user", v)}
                 onSubmit={() => props.nextField()}
                 placeholder="deploy"

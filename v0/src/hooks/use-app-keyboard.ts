@@ -136,7 +136,7 @@ export const useAppKeyboard = () => {
         }
         return
       }
-      if (key.name === "up") {
+      if (key.name === "up" || (key.name === "k" && !hostList.isSearching && !key.ctrl && !key.meta)) {
         key.stopPropagation()
         const total = filteredHosts().length
         if (total > 0) {
@@ -144,7 +144,7 @@ export const useAppKeyboard = () => {
         }
         return
       }
-      if (key.name === "down") {
+      if (key.name === "down" || (key.name === "j" && !hostList.isSearching && !key.ctrl && !key.meta)) {
         key.stopPropagation()
         const total = filteredHosts().length
         if (total > 0) {
@@ -162,27 +162,43 @@ export const useAppKeyboard = () => {
       }
       if (key.ctrl && key.name === "u") {
         key.stopPropagation()
+        setHostList("isSearching", false)
         setHostList("searchQuery", "")
         setHostList("selectedIndex", 0)
         return
       }
-      // Any printable character starts search
-      if (key.name && key.name.length === 1 && !key.ctrl && !key.meta) {
+      if (key.name === "/" && !hostList.isSearching && !key.ctrl && !key.meta) {
+        key.stopPropagation()
+        setHostList("isSearching", true)
+        setHostList("searchQuery", "")
+        setHostList("selectedIndex", 0)
+        return
+      }
+      if (hostList.isSearching && key.name && key.name.length === 1 && !key.ctrl && !key.meta) {
         key.stopPropagation()
         setHostList("searchQuery", (prev) => prev + key.name)
         setHostList("selectedIndex", 0)
         return
       }
       if (key.name === "backspace") {
-        key.stopPropagation()
-        setHostList("searchQuery", (prev) => prev.slice(0, -1))
-        setHostList("selectedIndex", 0)
+        if (hostList.isSearching) {
+          key.stopPropagation()
+          const next = hostList.searchQuery.slice(0, -1)
+          setHostList("searchQuery", next)
+          if (next.length === 0) {
+            setHostList("isSearching", false)
+          }
+          setHostList("selectedIndex", 0)
+        }
         return
       }
       if (key.name === "escape") {
-        key.stopPropagation()
-        setHostList("searchQuery", "")
-        setHostList("selectedIndex", 0)
+        if (hostList.isSearching) {
+          key.stopPropagation()
+          setHostList("isSearching", false)
+          setHostList("searchQuery", "")
+          setHostList("selectedIndex", 0)
+        }
         return
       }
       if (key.name === "s" && key.ctrl && !key.meta && !key.shift) {

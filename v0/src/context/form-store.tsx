@@ -1,21 +1,20 @@
 import { createSimpleContext } from "@/utils/create-simple-context"
 import type { FocusField } from "@/types"
 
+interface SSH_Host {
+  alias: string;
+  hostname: string;
+  user: string;
+  port: string;
+  identityFile: string;
+}
 interface FormState {
   showModal: boolean
   showOptions: boolean
   focusedField: FocusField
   isEditing: boolean
-  alias: string
-  hostname: string
-  user: string
-  port: string
-  identityFile: string
-  originalAlias: string
-  originalHostname: string
-  originalUser: string
-  originalPort: string
-  originalIdentityFile: string
+  host: SSH_Host
+  original: SSH_Host
 }
 
 const init: FormState = {
@@ -23,16 +22,20 @@ const init: FormState = {
   showOptions: false,
   focusedField: "alias",
   isEditing: false,
-  alias: "",
-  hostname: "",
-  user: "",
-  port: "",
-  identityFile: "",
-  originalAlias: "",
-  originalHostname: "",
-  originalUser: "",
-  originalPort: "",
-  originalIdentityFile: "",
+  host: {
+    alias: "",
+    hostname: "",
+    user: "",
+    port: "",
+    identityFile: "",
+  },
+  original: {
+    alias: "",
+    hostname: "",
+    user: "",
+    port: "",
+    identityFile: "",
+  },
 }
 
 export const FormStore = createSimpleContext<FormState>({

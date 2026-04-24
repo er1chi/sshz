@@ -21,7 +21,8 @@ export const StatusBar = () => {
         <text content="[^q] quit" textColor={COLORS.accessory} />
         <text content="[↵] connect" textColor={COLORS.accessory} />
         <text content={state.showIPs ? "[^s] hide ips" : "[^s] show ips"} textColor={COLORS.accessory} />
-        <Show when={state.searchQuery.length > 1}>
+        <text content="[/] search" textColor={COLORS.accessory} />
+        <Show when={state.isSearching}>
           <text content="[esc] clear" textColor={COLORS.accessory} />
         </Show>
       </box>

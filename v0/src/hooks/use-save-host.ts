@@ -1,35 +1,50 @@
-import { getSshHosts, appendSshHost, updateSshHost } from "@/utils/ssh"
-import { HostListStore } from "@/context/host-list-store"
-import { FormStore } from "@/context/form-store"
+import { getSshHosts, appendSshHost, updateSshHost } from "@/utils/ssh";
+import { HostListStore } from "@/context/host-list-store";
+import { FormStore } from "@/context/form-store";
 
 export const useSaveHost = () => {
-  const [, setHostList] = HostListStore.use()
-  const [form, setForm] = FormStore.use()
+  const [, setHostList] = HostListStore.use();
+  const [form, setForm] = FormStore.use();
 
   return () => {
-    if (!form.alias || !form.hostname || !form.user) return
+    if (!form.host.alias || !form.host.hostname || !form.host.user) return;
     if (form.isEditing) {
       const unchanged =
-        form.alias === form.originalAlias &&
-        form.hostname === form.originalHostname &&
-        form.user === form.originalUser &&
-        form.port === form.originalPort &&
-        form.identityFile === form.originalIdentityFile
-      if (unchanged) return
-      updateSshHost(form.originalAlias, form.alias, form.hostname, form.user, form.port || undefined, form.identityFile || undefined)
+        form.host.alias === form.original.alias &&
+        form.host.hostname === form.original.hostname &&
+        form.host.user === form.original.user &&
+        form.host.port === form.original.port &&
+        form.host.identityFile === form.original.identityFile;
+      if (unchanged) return;
+      updateSshHost(
+        form.original.alias,
+        form.host.alias,
+        form.host.hostname,
+        form.host.user,
+        form.host.port || undefined,
+        form.host.identityFile || undefined,
+      );
     } else {
-      appendSshHost(form.alias, form.hostname, form.user, form.port || undefined, form.identityFile || undefined)
+      appendSshHost(
+        form.host.alias,
+        form.host.hostname,
+        form.host.user,
+        form.host.port || undefined,
+        form.host.identityFile || undefined,
+      );
     }
-    setHostList("hosts", getSshHosts())
-    setForm("showModal", false)
+    setHostList("hosts", getSshHosts());
+    setForm("showModal", false);
     setForm({
-      alias: "",
-      hostname: "",
-      user: "",
-      port: "",
-      identityFile: "",
+      host: {
+        alias: "",
+        hostname: "",
+        user: "",
+        port: "",
+        identityFile: "",
+      },
       showOptions: false,
       isEditing: false,
-    })
-  }
-}
+    });
+  };
+};

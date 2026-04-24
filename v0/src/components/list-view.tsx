@@ -37,8 +37,8 @@ export const ListView = () => {
       >
         <box flexDirection="row" height={1} marginBottom={1}>
           <text content="> " textColor={COLORS.orange} />
-          <Show when={state.searchQuery} fallback={
-            <text content="Search hosts..." textColor={COLORS.placeholder} />
+          <Show when={state.isSearching || state.searchQuery} fallback={
+            <text content="/ to search..." textColor={COLORS.placeholder} />
           }>
             <text content={state.searchQuery} textColor={COLORS.title} />
             <text content="_" textColor={COLORS.orange} />
