@@ -10,4 +10,4 @@ will write a `v1` in go or rust
 
 - start projects with a template, don't use 100% barebones opencode/pi.
   - OR: be more descriptive with prompts and in back-and-forth planning. though probably a waste of tokens. just give the agent a good template/guardrails
-  - kimi does this absolutely wonderful "but wait... but wait... bUt WaIt TheReS mOrE..." as you watch your relatively cheap tokens get evaporated :D. Good heuristic for how good your prompt and etc is though I'd imagine.
+  - kimi routinely falls into the wonderous loop of "but wait... but wait... bUt WaIt TheReS mOrE..." predicated by essentially complaining about "not enough information from the user". Think this is remedied by simply asking for follow up questions.
