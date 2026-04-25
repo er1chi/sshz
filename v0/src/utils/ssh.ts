@@ -70,13 +70,13 @@ export function getSshHosts(): SelectOption[] {
   }
 }
 
-export function appendSshHost(
-  alias: string,
-  hostname: string,
-  user: string,
-  port?: string,
-  identityFile?: string,
-) {
+export function appendSshHost({
+  alias,
+  hostname,
+  user,
+  port,
+  identityFile,
+}: SSH_Host) {
   const sshDir = path.join(os.homedir(), ".ssh");
   const configPath = path.join(sshDir, "config");
 
@@ -100,13 +100,7 @@ export function appendSshHost(
   }
 }
 
-export function getHostDetails(alias: string): {
-  alias: string;
-  hostname: string;
-  user: string;
-  port: string;
-  identityFile: string;
-} | null {
+export function getHostDetails(alias: string): SSH_Host | null {
   const configPath = path.join(os.homedir(), ".ssh", "config");
   if (!fs.existsSync(configPath)) return null;
 
@@ -150,14 +144,9 @@ export function getHostDetails(alias: string): {
   return { alias, hostname, user, port, identityFile };
 }
 
-// TODO: wtf is this
 export function updateSshHost(
+  { alias, hostname, user, port, identityFile }: SSH_Host,
   oldAlias: string,
-  alias: string,
-  hostname: string,
-  user: string,
-  port?: string,
-  identityFile?: string,
 ): boolean {
   const configPath = path.join(os.homedir(), ".ssh", "config");
   if (!fs.existsSync(configPath)) return false;

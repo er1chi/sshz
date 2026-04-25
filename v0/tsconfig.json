@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
+    "types": ["node"],
     "jsx": "preserve",
     "jsxImportSource": "@opentui/solid",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "outDir": "./dist"
   }
 }

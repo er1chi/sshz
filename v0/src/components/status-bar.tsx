@@ -12,26 +12,25 @@ export const StatusBar = () => {
       flexDirection="row"
       alignItems="center"
       width="100%"
-      padding={{ left: 1, right: 1 }}
     >
       <box flexDirection="row" gap={2}>
-        <text content="[^n] new host" textColor={COLORS.accessory} />
-        <text content="[^e] edit" textColor={COLORS.accessory} />
-        <text content="[^d] delete" textColor={COLORS.accessory} />
-        <text content="[^q] quit" textColor={COLORS.accessory} />
-        <text content="[↵] connect" textColor={COLORS.accessory} />
-        <text content={state.showIPs ? "[^s] hide ips" : "[^s] show ips"} textColor={COLORS.accessory} />
-        <text content="[/] search" textColor={COLORS.accessory} />
+        <text content="[^n] new host" fg={COLORS.accessory} />
+        <text content="[^e] edit" fg={COLORS.accessory} />
+        <text content="[^d] delete" fg={COLORS.accessory} />
+        <text content="[^q] quit" fg={COLORS.accessory} />
+        <text content="[↵] connect" fg={COLORS.accessory} />
+        <text content={state.showIPs ? "[^s] hide ips" : "[^s] show ips"} fg={COLORS.accessory} />
+        <text content="[/] search" fg={COLORS.accessory} />
         <Show when={state.isSearching}>
-          <text content="[esc] clear" textColor={COLORS.accessory} />
+          <text content="[esc] clear" fg={COLORS.accessory} />
         </Show>
       </box>
       <box flexGrow={1} />
       <Show when={state.statusMessage}>
-        <text content={state.statusMessage} textColor={COLORS.orange} />
+        <text content={state.statusMessage} fg={COLORS.orange} />
       </Show>
       <Show when={!state.statusMessage && state.hosts.length > 0}>
-        <text content={`${state.hosts.length} hosts`} textColor={COLORS.muted} />
+        <text content={`${state.hosts.length} hosts`} fg={COLORS.muted} />
       </Show>
     </box>
   )

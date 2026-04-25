@@ -43,8 +43,6 @@ export const HostModal = (props: HostModalProps) => {
           backgroundColor={COLORS.panelBg}
           zIndex={11}
           flexDirection="column"
-          padding={1}
-          // padding={{ left: 2, right: 2, top: 1, bottom: 1 }}
         >
           <box flexDirection="column" gap={1} flexGrow={1}>
             <box flexDirection="row" width="100%" height={1}>

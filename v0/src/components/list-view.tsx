@@ -25,34 +25,34 @@ export const ListView = () => {
   })
 
   return (
-    <box flexGrow={1} flexDirection="column" width="100%" padding={{ left: 2, right: 2, top: 1, bottom: 1 }}>
+    <box flexGrow={1} flexDirection="column" width="100%">
       <Show
         when={state.hosts.length > 0}
         fallback={
           <box flexGrow={1} alignItems="center" justifyContent="center" flexDirection="column" gap={1}>
-            <text content="No configured SSH hosts found" textColor={COLORS.muted} />
-            <text content="Press [^n] to add your first host" textColor={COLORS.accessory} />
+            <text content="No configured SSH hosts found" fg={COLORS.muted} />
+            <text content="Press [^n] to add your first host" fg={COLORS.accessory} />
           </box>
         }
       >
         <box flexDirection="row" height={1} marginBottom={1}>
-          <text content="> " textColor={COLORS.orange} />
+          <text content="> " fg={COLORS.orange} />
           <Show when={state.isSearching || state.searchQuery} fallback={
-            <text content="/ to search..." textColor={COLORS.placeholder} />
+            <text content="/ to search..." fg={COLORS.placeholder} />
           }>
-            <text content={state.searchQuery} textColor={COLORS.title} />
-            <text content="_" textColor={COLORS.orange} />
+            <text content={state.searchQuery} fg={COLORS.title} />
+            <text content="_" fg={COLORS.orange} />
           </Show>
         </box>
 
         <box height={1} marginBottom={0} marginTop={1}>
-          <text content="Configured Hosts" textColor={COLORS.orange} />
+          <text content="Configured Hosts" fg={COLORS.orange} />
         </box>
 
         <box flexDirection="column" width="100%" gap={0}>
           <Show when={filteredHosts().length === 0}>
             <box height={1} marginTop={1}>
-              <text content="No hosts match your search" textColor={COLORS.muted} />
+              <text content="No hosts match your search" fg={COLORS.muted} />
             </box>
           </Show>
 
@@ -69,16 +69,16 @@ export const ListView = () => {
                 <text
                   content={isSelected ? "›" : " "}
                   width={1}
-                  textColor={isSelected ? COLORS.selectedText : COLORS.muted}
+                  fg={isSelected ? COLORS.selectedText : COLORS.muted}
                 />
                 <text
                   content={host.name}
-                  textColor={isSelected ? COLORS.selectedText : COLORS.title}
+                  fg={isSelected ? COLORS.selectedText : COLORS.title}
                 />
                 <box flexGrow={1} />
                 <text
                   content={getDisplayDescription(host, state.showIPs)}
-                  textColor={isSelected ? COLORS.selectedText : COLORS.accessory}
+                  fg={isSelected ? COLORS.selectedText : COLORS.accessory}
                 />
               </box>
             )
@@ -88,7 +88,7 @@ export const ListView = () => {
             <box height={1} marginTop={1} flexDirection="row">
               <text
                 content={` ${scrollOffset() + visibleHosts().length} / ${filteredHosts().length} `}
-                textColor={COLORS.muted}
+                fg={COLORS.muted}
               />
             </box>
           </Show>
