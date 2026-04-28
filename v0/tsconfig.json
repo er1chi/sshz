@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
     "types": ["node"],
+    "module": "esnext",
     "jsx": "preserve",
     "jsxImportSource": "@opentui/solid",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/*"]
     },

@@ -8,8 +8,8 @@ export interface SSH_Host {
   port: string;
   identityFile: string;
 }
+
 interface FormState {
-  showModal: boolean;
   showOptions: boolean;
   focusedField: FocusField;
   isEditing: boolean;
@@ -27,7 +27,6 @@ export const blankHost = {
 };
 
 const init: FormState = {
-  showModal: false,
   showOptions: false,
   focusedField: "alias",
   isEditing: false,
@@ -40,4 +39,3 @@ export const FormStore = createSimpleContext<FormState>({
   name: "Form",
   init,
 });
-

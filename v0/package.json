@@ -9,6 +9,8 @@
   "dependencies": {
     "@opentui/core": "latest",
     "@opentui/solid": "latest",
+    "@opentui-ui/dialog": "latest",
+    "@opentui-ui/toast": "latest",
     "solid-js": "latest"
   },
   "devDependencies": {

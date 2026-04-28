@@ -26,10 +26,7 @@ export const StatusBar = () => {
         </Show>
       </box>
       <box flexGrow={1} />
-      <Show when={state.statusMessage}>
-        <text content={state.statusMessage} fg={COLORS.orange} />
-      </Show>
-      <Show when={!state.statusMessage && state.hosts.length > 0}>
+      <Show when={state.hosts.length > 0}>
         <text content={`${state.hosts.length} hosts`} fg={COLORS.muted} />
       </Show>
     </box>

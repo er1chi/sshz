@@ -8,7 +8,6 @@ interface HostListState {
   searchQuery: string
   isSearching: boolean
   showIPs: boolean
-  statusMessage: string
 }
 
 const init: HostListState = {
@@ -17,7 +16,6 @@ const init: HostListState = {
   searchQuery: "",
   isSearching: false,
   showIPs: false,
-  statusMessage: "",
 }
 
 export const HostListStore = createSimpleContext<HostListState>({

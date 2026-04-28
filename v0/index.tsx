@@ -1,4 +1,4 @@
-import { render } from "@opentui/solid"
-import { App } from "@/app"
+import { render } from "@opentui/solid";
+import { App } from "@/app";
 
-render(() => <App />)
+render(() => <App />);
