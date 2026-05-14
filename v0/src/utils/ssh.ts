@@ -84,19 +84,20 @@ export function appendSshHost({
     fs.mkdirSync(sshDir, { mode: 0o700 });
   }
 
-  let block = `\nHost ${alias}\n    HostName ${hostname}\n    User ${user}`;
+  let block = `Host ${alias}\n    HostName ${hostname}\n    User ${user}`;
   if (port) block += `\n    Port ${port}`;
   if (identityFile) block += `\n    IdentityFile ${identityFile}`;
-  block += "\n";
 
   if (!fs.existsSync(configPath)) {
-    fs.writeFileSync(configPath, block, { mode: 0o600 });
+    fs.writeFileSync(configPath, block + "\n", { mode: 0o600 });
   } else {
     let existing = fs.readFileSync(configPath, "utf-8");
-    if (existing.length > 0 && !existing.endsWith("\n")) {
-      block = "\n" + block;
+    existing = existing.trimEnd();
+    if (existing.length === 0) {
+      fs.writeFileSync(configPath, block + "\n", { mode: 0o600 });
+    } else {
+      fs.writeFileSync(configPath, existing + "\n\n" + block + "\n", { mode: 0o600 });
     }
-    fs.appendFileSync(configPath, block);
   }
 }
 
@@ -185,16 +186,30 @@ export function updateSshHost(
   if (port) newBlock += `\n    Port ${port}`;
   if (identityFile) newBlock += `\n    IdentityFile ${identityFile}`;
 
-  const result = [
-    ...lines.slice(0, blockStart),
-    newBlock,
-    ...lines.slice(blockEnd),
-  ];
+  const before = lines.slice(0, blockStart);
+  const after = lines.slice(blockEnd);
 
-  let output = result.join("\n");
-  while (output.endsWith("\n\n")) {
-    output = output.slice(0, -1);
+  while (before.length > 0 && before[before.length - 1].trim() === "") {
+    before.pop();
   }
+  while (after.length > 0 && after[0].trim() === "") {
+    after.shift();
+  }
+
+  const result: string[] = [];
+  if (before.length > 0) {
+    result.push(...before);
+    result.push("");
+  }
+  result.push(...newBlock.split("\n"));
+  if (after.length > 0) {
+    result.push("");
+    result.push(...after);
+  }
+
+  let output = result.join("\n").trimStart().trimEnd();
+  output = output.replace(/\n{3,}/g, "\n\n");
+  output += "\n";
 
   fs.writeFileSync(configPath, output, { mode: 0o600 });
   return true;
@@ -233,9 +248,10 @@ export function deleteSshHost(alias: string): boolean {
   if (!found) return false;
 
   let output = result.join("\n");
-  while (output.endsWith("\n\n")) {
-    output = output.slice(0, -1);
-  }
+  output = output.trimStart();
+  output = output.trimEnd();
+  output = output.replace(/\n{3,}/g, "\n\n");
+  output += "\n";
 
   fs.writeFileSync(configPath, output, { mode: 0o600 });
   return true;

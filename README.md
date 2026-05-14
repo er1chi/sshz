@@ -6,6 +6,10 @@ mostly generated `v0` in typescript and opentui
 
 will write a `v1` in go or rust
 
+### features to add
+
+- "health check" and display active/dead connections
+
 ### v0 lessons
 
 - start projects with a template, don't use 100% barebones opencode/pi.

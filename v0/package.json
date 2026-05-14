@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "start": "bun index.tsx",
-    "app": "./sshz"
+    "app": "./sshz",
+    "test": "bun test"
   },
   "dependencies": {
     "@opentui/core": "latest",
