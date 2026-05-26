@@ -2,9 +2,10 @@
 set -euo pipefail
 
 OUTPUT_FILE=$(mktemp)
+trap 'rm -f "$OUTPUT_FILE"' EXIT
+
 SSHZ_OUTPUT="$OUTPUT_FILE" bun run "$(dirname "$0")/index.tsx"
 HOST=$(cat "$OUTPUT_FILE" 2>/dev/null || true)
-rm -f "$OUTPUT_FILE"
 
 if [ -z "$HOST" ]; then
   exit 1

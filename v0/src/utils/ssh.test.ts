@@ -48,12 +48,12 @@ afterEach(() => {
 describe("parseSshConfig", () => {
   test("parses well-formatted config", () => {
     const config = `Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 
 Host bar
-    HostName bar.com
-    User admin
+  HostName bar.com
+  User admin
 `;
     const hosts = parseSshConfig(config);
     expect(hosts).toHaveLength(2);
@@ -73,13 +73,13 @@ Host bar
     const config = `
 # This is a comment
 Host foo
-    HostName foo.com
-    User root
-    # inline comment
+  HostName foo.com
+  User root
+  # inline comment
 
 Host bar
-    HostName bar.com
-    User admin
+  HostName bar.com
+  User admin
 
 `;
     const hosts = parseSshConfig(config);
@@ -90,8 +90,8 @@ Host bar
 
   test("skips wildcard aliases", () => {
     const config = `Host foo *
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 `;
     const hosts = parseSshConfig(config);
     expect(hosts).toHaveLength(1);
@@ -100,10 +100,10 @@ Host bar
 
   test("handles missing HostName or User", () => {
     const config = `Host foo
-    User root
+  User root
 
 Host bar
-    HostName bar.com
+  HostName bar.com
 `;
     const hosts = parseSshConfig(config);
     expect(hosts[0].description).toBe("foo");
@@ -112,8 +112,8 @@ Host bar
 
   test("handles multiple aliases on a Host line", () => {
     const config = `Host foo bar
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 `;
     const hosts = parseSshConfig(config);
     expect(hosts).toHaveLength(2);
@@ -128,8 +128,8 @@ Host bar
   test("ignores properties before first Host block", () => {
     const config = `SomeRandomSetting value
 Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 `;
     const hosts = parseSshConfig(config);
     expect(hosts).toHaveLength(1);
@@ -144,8 +144,8 @@ describe("getSshHosts", () => {
 
   test("reads hosts from mocked config file", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 `);
     const hosts = getSshHosts();
     expect(hosts).toHaveLength(1);
@@ -164,11 +164,11 @@ describe("appendSshHost", () => {
     });
     const content = readConfig();
     expect(content.startsWith("Host foo")).toBe(true);
-    expect(content).toBe(`Host foo\n    HostName foo.com\n    User root\n`);
+    expect(content).toBe(`Host foo\n  HostName foo.com\n  User root\n`);
   });
 
   test("appends with exactly one blank line between blocks", () => {
-    writeConfig(`Host foo\n    HostName foo.com\n    User root\n`);
+    writeConfig(`Host foo\n  HostName foo.com\n  User root\n`);
     appendSshHost({
       alias: "bar",
       hostname: "bar.com",
@@ -177,12 +177,12 @@ describe("appendSshHost", () => {
       identityFile: "",
     });
     const content = readConfig();
-    const expected = `Host foo\n    HostName foo.com\n    User root\n\nHost bar\n    HostName bar.com\n    User admin\n`;
+    const expected = `Host foo\n  HostName foo.com\n  User root\n\nHost bar\n  HostName bar.com\n  User admin\n`;
     expect(content).toBe(expected);
   });
 
   test("normalizes file ending without newline before appending", () => {
-    writeConfig(`Host foo\n    HostName foo.com\n    User root`);
+    writeConfig(`Host foo\n  HostName foo.com\n  User root`);
     appendSshHost({
       alias: "bar",
       hostname: "bar.com",
@@ -191,12 +191,12 @@ describe("appendSshHost", () => {
       identityFile: "",
     });
     const content = readConfig();
-    const expected = `Host foo\n    HostName foo.com\n    User root\n\nHost bar\n    HostName bar.com\n    User admin\n`;
+    const expected = `Host foo\n  HostName foo.com\n  User root\n\nHost bar\n  HostName bar.com\n  User admin\n`;
     expect(content).toBe(expected);
   });
 
   test("does not add extra blank lines when appending to properly formatted file", () => {
-    writeConfig(`Host foo\n    HostName foo.com\n    User root\n\n`);
+    writeConfig(`Host foo\n  HostName foo.com\n  User root\n\n`);
     appendSshHost({
       alias: "bar",
       hostname: "bar.com",
@@ -205,7 +205,7 @@ describe("appendSshHost", () => {
       identityFile: "",
     });
     const content = readConfig();
-    const expected = `Host foo\n    HostName foo.com\n    User root\n\nHost bar\n    HostName bar.com\n    User admin\n`;
+    const expected = `Host foo\n  HostName foo.com\n  User root\n\nHost bar\n  HostName bar.com\n  User admin\n`;
     expect(content).toBe(expected);
   });
 
@@ -219,7 +219,7 @@ describe("appendSshHost", () => {
     });
     const content = readConfig();
     expect(content).toBe(
-      `Host foo\n    HostName foo.com\n    User root\n    Port 2222\n    IdentityFile ~/.ssh/foo\n`
+      `Host foo\n  HostName foo.com\n  User root\n  Port 2222\n  IdentityFile ~/.ssh/foo\n`,
     );
   });
 });
@@ -227,10 +227,10 @@ describe("appendSshHost", () => {
 describe("getHostDetails", () => {
   test("returns host details for existing alias", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
-    Port 2222
-    IdentityFile ~/.ssh/foo
+  HostName foo.com
+  User root
+  Port 2222
+  IdentityFile ~/.ssh/foo
 `);
     const details = getHostDetails("foo");
     expect(details).toEqual({
@@ -243,15 +243,15 @@ describe("getHostDetails", () => {
   });
 
   test("returns null for missing alias", () => {
-    writeConfig(`Host foo\n    HostName foo.com\n    User root\n`);
+    writeConfig(`Host foo\n  HostName foo.com\n  User root\n`);
     expect(getHostDetails("bar")).toBeNull();
   });
 
   test("ignores comments", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    # HostName ignored.com
-    User root
+  HostName foo.com
+  # HostName ignored.com
+  User root
 `);
     const details = getHostDetails("foo");
     expect(details?.hostname).toBe("foo.com");
@@ -261,12 +261,12 @@ describe("getHostDetails", () => {
 describe("updateSshHost", () => {
   test("updates existing block preserving surrounding blocks", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 
 Host bar
-    HostName bar.com
-    User admin
+  HostName bar.com
+  User admin
 `);
     const result = updateSshHost(
       {
@@ -276,23 +276,23 @@ Host bar
         port: "2222",
         identityFile: "",
       },
-      "foo"
+      "foo",
     );
     expect(result).toBe(true);
     const content = readConfig();
     expect(content).toBe(
-      `Host foo2\n    HostName foo2.com\n    User root2\n    Port 2222\n\nHost bar\n    HostName bar.com\n    User admin\n`
+      `Host foo2\n  HostName foo2.com\n  User root2\n  Port 2222\n\nHost bar\n  HostName bar.com\n  User admin\n`,
     );
   });
 
   test("keeps first block at line 1 when updating first block", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 
 Host bar
-    HostName bar.com
-    User admin
+  HostName bar.com
+  User admin
 `);
     updateSshHost(
       {
@@ -302,7 +302,7 @@ Host bar
         port: "",
         identityFile: "",
       },
-      "foo"
+      "foo",
     );
     const content = readConfig();
     expect(content.startsWith("Host foo2")).toBe(true);
@@ -310,14 +310,14 @@ Host bar
 
   test("maintains exactly one blank line between blocks after update", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 
 
 
 Host bar
-    HostName bar.com
-    User admin
+  HostName bar.com
+  User admin
 `);
     updateSshHost(
       {
@@ -327,17 +327,17 @@ Host bar
         port: "",
         identityFile: "",
       },
-      "foo"
+      "foo",
     );
     const content = readConfig();
     expect(content).not.toContain("\n\n\n");
     expect(content).toBe(
-      `Host foo2\n    HostName foo2.com\n    User root2\n\nHost bar\n    HostName bar.com\n    User admin\n`
+      `Host foo2\n  HostName foo2.com\n  User root2\n\nHost bar\n  HostName bar.com\n  User admin\n`,
     );
   });
 
   test("returns false when alias not found", () => {
-    writeConfig(`Host foo\n    HostName foo.com\n    User root\n`);
+    writeConfig(`Host foo\n  HostName foo.com\n  User root\n`);
     const result = updateSshHost(
       {
         alias: "bar",
@@ -346,7 +346,7 @@ Host bar
         port: "",
         identityFile: "",
       },
-      "missing"
+      "missing",
     );
     expect(result).toBe(false);
   });
@@ -355,60 +355,60 @@ Host bar
 describe("deleteSshHost", () => {
   test("deletes block and leaves proper spacing", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 
 Host bar
-    HostName bar.com
-    User admin
+  HostName bar.com
+  User admin
 `);
     const result = deleteSshHost("foo");
     expect(result).toBe(true);
     const content = readConfig();
-    expect(content).toBe(`Host bar\n    HostName bar.com\n    User admin\n`);
+    expect(content).toBe(`Host bar\n  HostName bar.com\n  User admin\n`);
   });
 
   test("keeps first block at line 1 when deleting later block", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 
 Host bar
-    HostName bar.com
-    User admin
+  HostName bar.com
+  User admin
 `);
     deleteSshHost("bar");
     const content = readConfig();
-    expect(content).toBe(`Host foo\n    HostName foo.com\n    User root\n`);
+    expect(content).toBe(`Host foo\n  HostName foo.com\n  User root\n`);
   });
 
   test("maintains exactly one blank line between remaining blocks", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 
 
 
 Host bar
-    HostName bar.com
-    User admin
+  HostName bar.com
+  User admin
 
 
 
 Host baz
-    HostName baz.com
-    User root
+  HostName baz.com
+  User root
 `);
     deleteSshHost("bar");
     const content = readConfig();
     expect(content).not.toContain("\n\n\n");
     expect(content).toBe(
-      `Host foo\n    HostName foo.com\n    User root\n\nHost baz\n    HostName baz.com\n    User root\n`
+      `Host foo\n  HostName foo.com\n  User root\n\nHost baz\n  HostName baz.com\n  User root\n`,
     );
   });
 
   test("returns false when alias not found", () => {
-    writeConfig(`Host foo\n    HostName foo.com\n    User root\n`);
+    writeConfig(`Host foo\n  HostName foo.com\n  User root\n`);
     expect(deleteSshHost("missing")).toBe(false);
   });
 });
@@ -416,14 +416,14 @@ Host baz
 describe("malformed config handling", () => {
   test("handles file with multiple blank lines between blocks", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 
 
 
 Host bar
-    HostName bar.com
-    User admin
+  HostName bar.com
+  User admin
 `);
     const hosts = getSshHosts();
     expect(hosts).toHaveLength(2);
@@ -431,11 +431,11 @@ Host bar
 
   test("handles file with no blank lines between blocks", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 Host bar
-    HostName bar.com
-    User admin
+  HostName bar.com
+  User admin
 `);
     const hosts = getSshHosts();
     expect(hosts).toHaveLength(2);
@@ -446,8 +446,8 @@ Host bar
 
 
 Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 `);
     const hosts = getSshHosts();
     expect(hosts).toHaveLength(1);
@@ -455,14 +455,14 @@ Host foo
 
   test("update normalizes spacing in malformed file", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 
 
 
 Host bar
-    HostName bar.com
-    User admin
+  HostName bar.com
+  User admin
 `);
     updateSshHost(
       {
@@ -472,34 +472,34 @@ Host bar
         port: "",
         identityFile: "",
       },
-      "foo"
+      "foo",
     );
     const content = readConfig();
     expect(content).toBe(
-      `Host foo2\n    HostName foo2.com\n    User root2\n\nHost bar\n    HostName bar.com\n    User admin\n`
+      `Host foo2\n  HostName foo2.com\n  User root2\n\nHost bar\n  HostName bar.com\n  User admin\n`,
     );
   });
 
   test("delete normalizes spacing in malformed file", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 
 
 
 Host bar
-    HostName bar.com
-    User admin
+  HostName bar.com
+  User admin
 `);
     deleteSshHost("foo");
     const content = readConfig();
-    expect(content).toBe(`Host bar\n    HostName bar.com\n    User admin\n`);
+    expect(content).toBe(`Host bar\n  HostName bar.com\n  User admin\n`);
   });
 
   test("append normalizes spacing in malformed file", () => {
     writeConfig(`Host foo
-    HostName foo.com
-    User root
+  HostName foo.com
+  User root
 
 
 
@@ -513,7 +513,7 @@ Host bar
     });
     const content = readConfig();
     expect(content).toBe(
-      `Host foo\n    HostName foo.com\n    User root\n\nHost bar\n    HostName bar.com\n    User admin\n`
+      `Host foo\n  HostName foo.com\n  User root\n\nHost bar\n  HostName bar.com\n  User admin\n`,
     );
   });
 });

@@ -8,13 +8,14 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@opentui/core": "latest",
-    "@opentui/solid": "latest",
     "@opentui-ui/dialog": "latest",
     "@opentui-ui/toast": "latest",
-    "solid-js": "latest"
+    "@opentui/core": "0.2.15",
+    "@opentui/solid": "0.2.15",
+    "solid-js": "1.9.13",
+    "zod": "4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^25.6.0"
+    "@types/node": "25.9.1"
   }
 }

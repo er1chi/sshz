@@ -1,4 +1,5 @@
 import { type SelectOption } from "@opentui/core"
+import * as fs from "node:fs"
 import * as os from "node:os"
 import * as path from "node:path"
 
@@ -21,4 +22,23 @@ export function filterHosts(hosts: SelectOption[], query: string): SelectOption[
   )
 }
 
-export const outputFile = process.env.SSHZ_OUTPUT || path.join(os.tmpdir(), `sshz-${process.pid}.out`)
+function safeOutputFile(): string {
+  const fallback = path.join(os.tmpdir(), `sshz-${process.pid}.out`)
+  const provided = process.env.SSHZ_OUTPUT
+  if (!provided) return fallback
+
+  const resolved = path.resolve(provided)
+  const tmpDir = path.resolve(os.tmpdir())
+  if (resolved === tmpDir || !resolved.startsWith(tmpDir + path.sep)) return fallback
+
+  try {
+    const stat = fs.statSync(resolved)
+    if (!stat.isFile()) return fallback
+    if ((stat.mode & 0o077) !== 0) fs.chmodSync(resolved, 0o600)
+    return resolved
+  } catch {
+    return fallback
+  }
+}
+
+export const outputFile = safeOutputFile()
