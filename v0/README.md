@@ -1,5 +1,9 @@
 # sshz v0 — OpenTUI + Solid.js Proof of Concept
 
+NOTE: this is sloppity slop, desperately needs a re-(generate)write
+
+Unironically have a better impl in sesh, which will be brought over here with an improved ui, the full screen is unnecessary
+
 A minimal SSH host picker built with [OpenTUI](https://opentui.com) and Solid.js bindings.
 
 ## How it works
